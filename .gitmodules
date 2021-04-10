@@ -1,0 +1,6 @@
+[submodule "application/extensions/flask-admin"]
+	path = application/extensions/flask-admin
+	url = git@github.com:Sylver11/flask-admin.git
+[submodule "application/extensions/flask-security"]
+	path = application/extensions/flask-security
+	url = git@github.com:Sylver11/flask-security.git

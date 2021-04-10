@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from flask_login import current_user
-from application.extensions.security.models import User
+#from application.extensions.security.models import User
 import sys, traceback
 import functools
 import logging
@@ -18,7 +18,7 @@ def catch_view_exception(f):
         except Exception as ex:
             template = 'User uuid: {}\nTraceback: {}'
             user_uuid = 'Unkown'
-            if isinstance(current_user, User):
+            if current_user.uuid:
                 user_uuid = current_user.uuid
             admin_error_message = template.format(
                     user_uuid,
