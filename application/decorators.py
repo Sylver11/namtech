@@ -18,7 +18,7 @@ def catch_view_exception(f):
         except Exception as ex:
             template = 'User uuid: {}\nTraceback: {}'
             user_uuid = 'Unkown'
-            if current_user.uuid:
+            if current_user.is_authenticated:
                 user_uuid = current_user.uuid
             admin_error_message = template.format(
                     user_uuid,

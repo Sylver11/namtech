@@ -2,10 +2,11 @@
 the application gets configured and build. """
 
 def init_extensions(app):
+    from flask_admin import Admin
+    admin = Admin(app, name='', template_mode='bootstrap5')
     from flask_security import SecurityManager, UserDatastore
     from application.database import db
     user_datastore = UserDatastore(db)
-    #from application.extensions.flask-security import SecurityManager
     security_manager = SecurityManager(app, user_datastore)
 
 
