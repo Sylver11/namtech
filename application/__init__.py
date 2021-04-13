@@ -46,6 +46,9 @@ def create_app(env=''):
     from flask import Flask
     app = Flask(__name__)
     app.config.from_object('config.Config' + env)
+#    import logging.config
+#    logging.config.fileConfig('logging_config.ini', disable_existing_loggers=False)
+#    logger = logging.getLogger(__name__)
     with app.app_context():
         register_blueprints(app)
         init_extensions(app)

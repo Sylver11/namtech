@@ -1,5 +1,6 @@
 from os import environ, path
 from dotenv import load_dotenv
+from logging.config import dictConfig
 
 basedir = path.abspath(path.dirname(__file__))
 load_dotenv(path.join(basedir, '.env'))
@@ -38,3 +39,4 @@ class ConfigTesting(Config):
     DEBUG = False
     TESTING = True
     SQLALCHEMY_DATABASE_URI = environ.get("SQLALCHEMY_TEST_DATABASE_URI")
+

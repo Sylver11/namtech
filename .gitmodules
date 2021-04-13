@@ -4,3 +4,6 @@
 [submodule "application/extensions/flask-security"]
 	path = application/extensions/flask-security
 	url = git@github.com:Sylver11/flask-security.git
+[submodule "application/extensions/flask-logging"]
+	path = application/extensions/flask-logging
+	url = git@github.com:Sylver11/flask-logging.git
