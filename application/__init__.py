@@ -1,6 +1,26 @@
 """ This the heart of the application. From here
 the application gets configured and build. """
 
+def configure_logging(app):
+    import logging
+    import logging.config
+    from logging.handlers import SMTPHandler
+    logging.config.fileConfig('logging_config.ini', disable_existing_loggers=False)
+    mail_handler = SMTPHandler(
+        mailhost=(app.config['MAIL_HOST'],app.config['MAIL_PORT']),
+        fromaddr=app.config['MAIL_FROM_ADDRESS'],
+        toaddrs=app.config['SERVER_ADMIN_MAIL'],
+        credentials=(app.config['MAIL_USERNAME'],
+            app.config['MAIL_PASSWORD']),
+        subject='Application Error'
+    )
+    mail_handler.setLevel(logging.ERROR)
+    mail_handler.setFormatter(logging.Formatter(
+        '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+    ))
+    app.config['MAIL_ERRORS']:
+        app.logger.addHandler(mail_handler)
+
 def init_extensions(app):
     from flask_admin import Admin
     admin = Admin(app, name='', template_mode='bootstrap5')
@@ -46,9 +66,7 @@ def create_app(env=''):
     from flask import Flask
     app = Flask(__name__)
     app.config.from_object('config.Config' + env)
-#    import logging.config
-#    logging.config.fileConfig('logging_config.ini', disable_existing_loggers=False)
-#    logger = logging.getLogger(__name__)
+    configure_logging(app)
     with app.app_context():
         register_blueprints(app)
         init_extensions(app)
