@@ -16,22 +16,24 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ASSETS_DEBUG = True
     ASSETS_AUTO_BUILD = True
-    SERVER_NAME = environ.get('SERVER_NAME')
-    MAIL_SERVER = environ.get('MAIL_SERVER')
-    MAIL_PORT = 465
-    MAIL_USERNAME = environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = environ.get('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = environ.get('MAIL_DEFAULT_SENDER')
-    MAIL_USE_SSL = True
-    MAIL_USE_TLS = False
-    MAIL_ERRORS = True
-    ADMIN = environ.get('SERVER_ADMIN')
+    LOG_DATABASE_ACTIVE = environ.get('LOG_DATABASE_ACTIVE').lower() == 'true'
+    LOG_SENTRY_ACTIVE = environ.get('LOG_SENTRY_ACTIVE').lower() == 'true'
+    LOG_SENTRY_DSN = environ.get('LOG_SENTRY_DSN')
+    LOG_MAIL_ACTIVE = environ.get('LOG_MAIL_ACTIVE').lower() == 'true'
+    LOG_MAIL_HOST = environ.get('LOG_MAIL_HOST')
+    LOG_MAIL_PORT = environ.get('LOG_MAIL_PORT')
+    LOG_MAIL_USERNAME = environ.get('LOG_MAIL_USERNAME')
+    LOG_MAIL_PASSWORD = environ.get('LOG_MAIL_PASSWORD')
+    LOG_MAIL_FROM_ADDRESS = environ.get('LOG_MAIL_FROM_ADDRESS')
+    LOG_MAIL_TO_ADDRESS = environ.get('LOG_MAIL_TO_ADDRESS')
 
 
 class ConfigProduction(Config):
     DEVELOPMENT = False
     DEBUG = False
     ASSETS_DEBUG = False
+    SERVER_NAME = environ.get('SERVER_NAME')
+    SERVER_ADMIN_MAIL = environ.get('SERVER_ADMIN_MAIL')
 
 
 class ConfigTesting(Config):

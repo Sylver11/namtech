@@ -3,22 +3,50 @@ the application gets configured and build. """
 
 def configure_logging(app):
     import logging
-    import logging.config
-    #from logging.handlers import SMTPHandler
-    from application.logger import mail_handler
-    logging.config.fileConfig('logging_config.ini', disable_existing_loggers=False)
-    loggers = [app.logger, logging.getLogger('sqlalchemy'),
-            logging.getLogger('werkzeug')]
-    for logger in loggers:
-        logger.add(
-        if app.config['DATABASE_ERROR_LOG']:
-            logger.add(sql_alchemy_handler)
-        if app.config['MAIL_ERRORS']:
-            logger.addHandler(mail_handler)
+    #import logging.config
+    root = logging.getLogger()
+    if app.config['LOG_SENTRY_ACTIVE']:
+        import sentry_sdk
+        from sentry_sdk.integrations.flask import FlaskIntegration
+        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+        sentry_sdk.init(
+            dsn=app.config['LOG_SENTRY_DSN'],
+            integrations=[FlaskIntegration(),SqlalchemyIntegration()],
+            traces_sample_rate=1.0
+        )
+    if app.config['LOG_MAIL_ACTIVE']:
+        from application.logger import ThreadedSMTPHandler
+        mailhost = app.config['LOG_MAIL_HOST']
+        port = app.config['LOG_MAIL_PORT']
+        fromaddr = app.config['LOG_MAIL_FROM_ADDRESS']
+        toaddrs = app.config['LOG_MAIL_TO_ADDRESS']
+        username = app.config['LOG_MAIL_USERNAME']
+        password = app.config['LOG_MAIL_PASSWORD']
+        mail_handler = ThreadedSMTPHandler(
+            mailhost=(mailhost,port),
+            fromaddr=fromaddr,
+            toaddrs=toaddrs,
+            credentials=(username,password),
+            subject='Application Error')
+        mail_handler.setLevel(logging.ERROR)
+        logging.getLogger('werkzeug').addHandler(mail_handler)
+        root.addHandler(mail_handler)
+        app.logger.addHandler(mail_handler)
+    if app.config['LOG_DATABASE_ACTIVE']:
+        from application.logger import SQLAlchemyHandler
+        database_handler = SQLAlchemyHandler()
+        database_handler.setLevel(logging.ERROR)
+        logging.getLogger('werkzeug').addHandler(database_handler)
+        app.logger.addHandler(database_handler)
+        root.addHandler(database_handler)
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return error, 500
 
 def init_extensions(app):
-    from flask_admin import Admin
-    admin = Admin(app, name='', template_mode='bootstrap5')
+    #from flask_admin import Admin
+    #admin = Admin(app, name='', template_mode='bootstrap5')
     from flask_security import SecurityManager, UserDatastore
     from application.database import db
     user_datastore = UserDatastore(db)
@@ -26,7 +54,7 @@ def init_extensions(app):
 
 
 def init_vendors(app):
-    from flask_mail import Mail
+    #from flask_mail import Mail
     from flask_assets import Environment
     from application.assets import compile_assets
     from application.database import db
@@ -35,7 +63,7 @@ def init_vendors(app):
     compile_assets(assets)
     db.init_app(app)
     db.create_all()
-    Mail(app)
+    #Mail(app)
 
 
 def register_blueprints(app):
@@ -46,10 +74,10 @@ def register_blueprints(app):
             app.register_blueprint(mod.bp)
     return None
 
-def add_error_page(app):
-    @app.errorhandler(500)
-    def internal_server_error(error):
-        return error, 500
+#def add_error_page(app):
+#    @app.errorhandler(500)
+#    def internal_server_error(error):
+#        return error, 500
 
 def run_migration(app):
     from application.database import db

@@ -1,5 +1,6 @@
 from application.database import db, UUID
 from datetime import datetime
+import uuid as uuid_ext
 
 class Log(db.Model):
     __tablename__ = 'na_logs'
@@ -10,7 +11,7 @@ class Log(db.Model):
     logger = db.Column(db.String(255))
     level = db.Column(db.String(255))
     trace = db.Column(db.Text)
-    msg = db.Column(db.String(255))
+    msg = db.Column(db.Text)
     created = db.Column(db.DateTime, default=datetime.utcnow)
     updated = db.Column(db.DateTime,
             default=datetime.utcnow,

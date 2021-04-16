@@ -28,6 +28,7 @@ setup(
             'Jinja2==2.11.1',
             'Jsmin==2.2.2',
             'Cssmin==0.2.0',
+            'sentry-sdk==1.0.0',
             ],
 
     )
