@@ -42,6 +42,11 @@ def configure_logging(app):
 
     @app.errorhandler(500)
     def internal_server_error(error):
+        original_error = getattr(error, "original_exception", None)
+        if original_error is None:
+            do = "dummy"
+            print('original exception is none')
+        print(original_error)
         return error, 500
 
 def init_extensions(app):

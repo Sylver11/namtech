@@ -21,6 +21,7 @@ def compile_assets(assets):
             'src/js/vendors/jquery.js',
             'src/js/vendors/bootstrap.bundle.js',
             'src/js/vendors/notify.js',
+            'src/js/vendors/jquery.validate.js',
             filters='jsmin',
             output='dist/js/vendor.min.js'
         )
