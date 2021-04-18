@@ -2,8 +2,10 @@
 the application gets configured and build. """
 
 def configure_logging(app):
+    from flask import jsonify, has_request_context, request
+    import sys, traceback
+    from flask_login import current_user
     import logging
-    #import logging.config
     root = logging.getLogger()
     if app.config['LOG_SENTRY_ACTIVE']:
         import sentry_sdk
@@ -23,31 +25,48 @@ def configure_logging(app):
         username = app.config['LOG_MAIL_USERNAME']
         password = app.config['LOG_MAIL_PASSWORD']
         mail_handler = ThreadedSMTPHandler(
-            mailhost=(mailhost,port),
+            mailhost=(mailhost, port),
             fromaddr=fromaddr,
             toaddrs=toaddrs,
             credentials=(username,password),
             subject='Application Error')
         mail_handler.setLevel(logging.ERROR)
-        logging.getLogger('werkzeug').addHandler(mail_handler)
-        root.addHandler(mail_handler)
         app.logger.addHandler(mail_handler)
     if app.config['LOG_DATABASE_ACTIVE']:
         from application.logger import SQLAlchemyHandler
         database_handler = SQLAlchemyHandler()
         database_handler.setLevel(logging.ERROR)
-        logging.getLogger('werkzeug').addHandler(database_handler)
         app.logger.addHandler(database_handler)
-        root.addHandler(database_handler)
 
     @app.errorhandler(500)
     def internal_server_error(error):
         original_error = getattr(error, "original_exception", None)
+        handled_error = False
         if original_error is None:
-            do = "dummy"
-            print('original exception is none')
-        print(original_error)
-        return error, 500
+            handled_error = True
+        print(handled_error)
+        template = 'User uuid:{}\nIP:{}\nRequested URL:{}\nTraceback:{}'
+        request_remote_addr = request_url = user_uuid = 'Unknown'
+        post = False
+        if has_request_context():
+            request_url = request.url
+            request_remote_addr = request.remote_addr
+            if request.method == 'POST':
+                post = True
+            if current_user.is_authenticated:
+                user_uuid = current_user.uuid
+        admin_error_message = template.format(
+                user_uuid,
+                request_remote_addr,
+                request_url,
+                traceback.format_exc())
+        app.logger.error(admin_error_message)
+        template = 'An exception of type {0} occurred. Description:\n{1}'
+        user_error_message = template.format(error.name, error.description)
+        if post:
+            return jsonify(user_error_message), 500
+        return user_error_message, 500
+    return None
 
 def init_extensions(app):
     #from flask_admin import Admin
@@ -79,10 +98,6 @@ def register_blueprints(app):
             app.register_blueprint(mod.bp)
     return None
 
-#def add_error_page(app):
-#    @app.errorhandler(500)
-#    def internal_server_error(error):
-#        return error, 500
 
 def run_migration(app):
     from application.database import db
