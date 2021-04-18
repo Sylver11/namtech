@@ -33,3 +33,4 @@ def compile_assets(assets):
     if os.getenv('FLASK_ENV') == 'DEVELOPMENT':
         main_css_bundle.build()
         main_js_bundle.build()
+        vendor_js_bundle.build()
