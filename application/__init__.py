@@ -69,11 +69,16 @@ def configure_logging(app):
     return None
 
 def init_extensions(app):
-    #from flask_admin import Admin
-    #admin = Admin(app, name='', template_mode='bootstrap5')
-    from flask_security import SecurityManager, UserDatastore
+    from flask_admin import Admin
+    from application.modelviews import AdminModelView
     from application.database import db
-    user_datastore = UserDatastore(db)
+    from application.models import User, Group, Role
+    from flask_security import SecurityManager, UserDatastore
+    admin = Admin(app, name='', template_mode='bootstrap4')
+    admin.add_view(AdminModelView(User, db.session, category='Security'))
+    admin.add_view(AdminModelView(Group, db.session, category='Security'))
+    admin.add_view(AdminModelView(Role, db.session, category='Security'))
+    user_datastore = UserDatastore(db, User, Group, Role)
     security_manager = SecurityManager(app, user_datastore)
 
 
