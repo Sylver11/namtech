@@ -1,0 +1,4 @@
+default_values:
+    na_user_role:
+      name: 'superuser'
+      description: 'The absolute baas'

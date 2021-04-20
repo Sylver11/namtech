@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from datetime import datetime
 import uuid
 
-db = SQLAlchemy()
 
+db = SQLAlchemy()
 
 class UUID(types.TypeDecorator):
     impl = MSBinary

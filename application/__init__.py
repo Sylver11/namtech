@@ -44,7 +44,6 @@ def configure_logging(app):
         handled_error = False
         if original_error is None:
             handled_error = True
-        print(handled_error)
         template = 'User uuid:{}\nIP:{}\nRequested URL:{}\nTraceback:{}'
         request_remote_addr = request_url = user_uuid = 'Unknown'
         post = False
@@ -63,6 +62,10 @@ def configure_logging(app):
         app.logger.error(admin_error_message)
         template = 'An exception of type {0} occurred. Description:\n{1}'
         user_error_message = template.format(error.name, error.description)
+        if handled_error:
+            if post:
+                return jsonify('The error has already been handled'), 500
+            return 'The error has already been handled', 500
         if post:
             return jsonify(user_error_message), 500
         return user_error_message, 500
@@ -110,6 +113,30 @@ def run_migration(app):
     return Migrate(app, db)
 
 
+def setup_db_defaults(app):
+    @app.before_first_request
+    def db_setup():
+    import confuse
+    from application.database import db
+    from sqlalchemy.sql import text
+    config = confuse.Configuration('database', __name__)
+    nested_dict = config['default_values'].get()
+    if not nested_dict:
+        return None
+    for table_name, values in nested_dict.items():
+        query_string = "SELECT * FROM " + table_name + " WHERE 1 = 1 "
+        insert_string = "INSERT INTO " + table_name + " ("
+        insert_string_values = ") VALUES ("
+        for key in values:
+            query_string += "AND " + key + "=" + "'" + values[key] + "'"
+            insert_string += key + ","
+            insert_string_values += "'" + values[key] + "',"
+        if bool(db.session.execute(text(query_string))):
+            continue
+        insert_string += insert_string_values + ")"
+        db.session.execute(text(insert_string)):
+
+
 def create_app(env=''):
     from flask import Flask
     app = Flask(__name__)
@@ -120,4 +147,5 @@ def create_app(env=''):
         init_extensions(app)
         init_vendors(app)
         run_migration(app)
+        setup_db_defaults(app)
         return app
