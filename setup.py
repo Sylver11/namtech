@@ -29,6 +29,7 @@ setup(
             'Jsmin==2.2.2',
             'Cssmin==0.2.0',
             'sentry-sdk==1.0.0',
+            'confuse==1.4.0',
             ],
 
     )

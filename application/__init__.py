@@ -116,25 +116,29 @@ def run_migration(app):
 def setup_db_defaults(app):
     @app.before_first_request
     def db_setup():
-    import confuse
-    from application.database import db
-    from sqlalchemy.sql import text
-    config = confuse.Configuration('database', __name__)
-    nested_dict = config['default_values'].get()
-    if not nested_dict:
-        return None
-    for table_name, values in nested_dict.items():
-        query_string = "SELECT * FROM " + table_name + " WHERE 1 = 1 "
-        insert_string = "INSERT INTO " + table_name + " ("
-        insert_string_values = ") VALUES ("
-        for key in values:
-            query_string += "AND " + key + "=" + "'" + values[key] + "'"
-            insert_string += key + ","
-            insert_string_values += "'" + values[key] + "',"
-        if bool(db.session.execute(text(query_string))):
-            continue
-        insert_string += insert_string_values + ")"
-        db.session.execute(text(insert_string)):
+        if not app.config['DB_DEFAULT_VALUES_ACTIVE']:
+            return None
+        import confuse
+        from application.database import db
+        from sqlalchemy.sql import exists
+        from application.models import User, Group, Role
+        config = confuse.Configuration('namtech', __name__)
+        config.set_file('namtech.yaml')
+        nested_dict = config['default'].get()
+        if not nested_dict:
+            return None
+        for model, values in nested_dict.items():
+            qry_string = 'exists = db.session.query(' + model + ').filter('
+            insert_string = 'db.session.add(' + model + '('
+            for key in values:
+                qry_string += model + "." + key + "=='" + values[key] + "',"
+                insert_string += key + "='" + values[key] + "',"
+            qry_string = qry_string.rstrip(',') + ').first()'
+            insert_string = insert_string.rstrip(',') + '))'
+            exec(qry_string)
+            if exists == False:
+                exec(insert_string)
+                db.session.commit()
 
 
 def create_app(env=''):

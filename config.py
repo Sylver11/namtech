@@ -18,7 +18,6 @@ class Config:
     ASSETS_DEBUG = True
     ASSETS_AUTO_BUILD = True
     DB_DEFAULT_VALUES_ACTIVE = True
-    DB_DEFAULT_VALUES
     LOG_DATABASE_ACTIVE = environ.get('LOG_DATABASE_ACTIVE').lower() == 'true'
     LOG_SENTRY_ACTIVE = environ.get('LOG_SENTRY_ACTIVE').lower() == 'true'
     LOG_SENTRY_DSN = environ.get('LOG_SENTRY_DSN')
