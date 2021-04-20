@@ -120,25 +120,26 @@ def setup_db_defaults(app):
             return None
         import confuse
         from application.database import db
-        from sqlalchemy.sql import exists
         from application.models import User, Group, Role
-        config = confuse.Configuration('namtech', __name__)
-        config.set_file('namtech.yaml')
+        config = confuse.Configuration('NamTech', __name__)
+        config.set_file('database.yaml')
         nested_dict = config['default'].get()
         if not nested_dict:
             return None
         for model, values in nested_dict.items():
-            qry_string = 'exists = db.session.query(' + model + ').filter('
-            insert_string = 'db.session.add(' + model + '('
+            if not model in locals():
+                continue
+            Model = locals()[model]
+            model = Model()
+            conditions = []
             for key in values:
-                qry_string += model + "." + key + "=='" + values[key] + "',"
-                insert_string += key + "='" + values[key] + "',"
-            qry_string = qry_string.rstrip(',') + ').first()'
-            insert_string = insert_string.rstrip(',') + '))'
-            exec(qry_string)
-            if exists == False:
-                exec(insert_string)
-                db.session.commit()
+                conditions.append(getattr(Model, key) == values[key])
+                setattr(model, key, values[key])
+            exists = db.session.query(Model).filter(db.and_(*conditions)).scalar()
+            if exists:
+                continue
+            db.session.add(model)
+            db.session.commit()
 
 
 def create_app(env=''):

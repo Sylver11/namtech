@@ -3,3 +3,6 @@ default:
     Role:
       name: 'superuser'
       description: 'The absolute baas'
+    Role:
+      name: 'user'
+      description: 'Normal User'

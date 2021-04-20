@@ -17,11 +17,11 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ASSETS_DEBUG = True
     ASSETS_AUTO_BUILD = True
-    DB_DEFAULT_VALUES_ACTIVE = True
-    LOG_DATABASE_ACTIVE = environ.get('LOG_DATABASE_ACTIVE').lower() == 'true'
-    LOG_SENTRY_ACTIVE = environ.get('LOG_SENTRY_ACTIVE').lower() == 'true'
+    DB_DEFAULT_VALUES_ACTIVE = environ.get('DB_DEFAULT_VALUES_ACTIVE','false').lower() == 'true'
+    LOG_DATABASE_ACTIVE = environ.get('LOG_DATABASE_ACTIVE','false').lower() == 'true'
+    LOG_SENTRY_ACTIVE = environ.get('LOG_SENTRY_ACTIVE','false').lower() == 'true'
     LOG_SENTRY_DSN = environ.get('LOG_SENTRY_DSN')
-    LOG_MAIL_ACTIVE = environ.get('LOG_MAIL_ACTIVE').lower() == 'true'
+    LOG_MAIL_ACTIVE = environ.get('LOG_MAIL_ACTIVE','false').lower() == 'true'
     LOG_MAIL_HOST = environ.get('LOG_MAIL_HOST')
     LOG_MAIL_PORT = environ.get('LOG_MAIL_PORT')
     LOG_MAIL_USERNAME = environ.get('LOG_MAIL_USERNAME')
