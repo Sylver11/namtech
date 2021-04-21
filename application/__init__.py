@@ -119,27 +119,33 @@ def setup_db_defaults(app):
         if not app.config['DB_DEFAULT_VALUES_ACTIVE']:
             return None
         import confuse
+        from sqlalchemy import exc
         from application.database import db
         from application.models import User, Group, Role
         config = confuse.Configuration('NamTech', __name__)
         config.set_file('database.yaml')
-        nested_dict = config['default'].get()
+        nested_dict = config['db-defaults'].get()
         if not nested_dict:
             return None
-        for model, values in nested_dict.items():
+        for model, nested_value_list in nested_dict.items():
             if not model in locals():
                 continue
             Model = locals()[model]
             model = Model()
-            conditions = []
-            for key in values:
-                conditions.append(getattr(Model, key) == values[key])
-                setattr(model, key, values[key])
-            exists = db.session.query(Model).filter(db.and_(*conditions)).scalar()
-            if exists:
-                continue
-            db.session.add(model)
-            db.session.commit()
+            for value_dict in nested_value_list:
+                conditions = []
+                for key, value in value_dict.items():
+                    conditions.append(getattr(Model, key) == value)
+                    setattr(model, key, value)
+                exists = db.session.query(Model).filter(db.and_(*conditions)).scalar()
+                if exists:
+                    continue
+                try:
+                    db.session.add(model)
+                    db.session.commit()
+                except exc.SQLAlchemyError as e:
+                    db.session.rollback()
+                    app.logger.error(e.orig)
 
 
 def create_app(env=''):

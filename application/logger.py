@@ -17,8 +17,12 @@ class SQLAlchemyHandler(logging.Handler):
             level=record.__dict__['levelname'],
             trace=trace,
             msg=record.__dict__['msg'],)
-        db.session.add(log)
-        db.session.commit()
+        try:
+            db.session.flush()
+            db.session.add(log)
+            db.session.commit()
+        except:
+            db.session.rollback()
 
 
 class SSLSMTPHandler(SMTPHandler):
