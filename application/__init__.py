@@ -131,8 +131,8 @@ def setup_db_defaults(app):
             if not model in locals():
                 continue
             Model = locals()[model]
-            model = Model()
             for value_dict in nested_value_list:
+                model = Model()
                 conditions = []
                 for key, value in value_dict.items():
                     conditions.append(getattr(Model, key) == value)

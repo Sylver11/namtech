@@ -127,6 +127,12 @@ class User(db.Model):
     def is_active(self):
         return self.active
 
+    def toggle_active(self):
+        self.active = not self.active
+
+    def deactivate_user(self):
+        self.active = False
+
     def add_roles(self, *roles):
         self.roles.extend([role for role in roles if role not in self.roles])
 
