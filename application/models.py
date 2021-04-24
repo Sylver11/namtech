@@ -4,6 +4,7 @@ from application.database import db, UUID
 from datetime import datetime
 import uuid as uuid_ext
 
+
 class Log(db.Model):
     __tablename__ = 'na_logs'
     uuid = db.Column(
@@ -33,7 +34,7 @@ class Log(db.Model):
 
 
 user_role_assoc = db.Table('na_user_role_assoc',
-        db.Column('id', db.Integer(), primary_key=True),
+        db.metadata,
         db.Column(
             'user_uuid',
             UUID,
@@ -46,17 +47,17 @@ user_role_assoc = db.Table('na_user_role_assoc',
             primary_key=True),
         extend_existing=True)
 
-role_hierachy_assoc = db.Table('na_user_role_hierachy_assoc',
-        db.Column('id', db.Integer(), primary_key=True),
+user_group_assoc = db.Table('na_user_group_assoc',
+        db.metadata,
         db.Column(
-            'parent_role_uuid',
+            'user_uuid',
             UUID,
-            db.ForeignKey('na_user_role.uuid'),
+            db.ForeignKey('na_user.uuid'),
             primary_key=True),
         db.Column(
-            'child_role_uuid',
+            'group_uuid',
             UUID,
-            db.ForeignKey('na_user_role.uuid'),
+            db.ForeignKey('na_user_group.uuid'),
             primary_key=True),
         extend_existing=True)
 
@@ -69,13 +70,9 @@ class Role(db.Model):
             default=uuid_ext.uuid4)
     name = db.Column(db.String(255), unique=True)
     description = db.Column(db.String(255))
-    child_roles = relationship(
-            'Role',
-            secondary= role_hierachy_assoc,
-            primaryjoin=uuid==role_hierachy_assoc.c.parent_role_uuid,
-            secondaryjoin=uuid==role_hierachy_assoc.c.child_role_uuid,
-            backref="parent_roles")
-
+    users = relationship('User',
+            secondary=user_role_assoc,
+            back_populates='roles')
     created = db.Column(db.DateTime, default=datetime.utcnow)
     updated = db.Column(db.DateTime,
             default=datetime.utcnow,
@@ -102,11 +99,12 @@ class User(db.Model):
     current_login_ip = db.Column(db.String(100))
     login_count = db.Column(db.Integer)
     active = db.Column(db.Boolean())
-    roles = relationship('Role', secondary=user_role_assoc,
-            backref=db.backref('users', lazy='dynamic'))
-    group_uuid = db.Column(UUID, db.ForeignKey('na_user_group.uuid'))
-    group = relationship('Group', back_populates='users')
-    group_admin = db.Column(db.Boolean, nullable=False, default=False)
+    roles = relationship('Role',
+            secondary=user_role_assoc,
+            back_populates='users')
+    groups = relationship('Group',
+            secondary=user_group_assoc,
+            back_populates='users')
     created = db.Column(db.DateTime, default=datetime.utcnow)
     updated = db.Column(db.DateTime,
             default=datetime.utcnow,
@@ -165,9 +163,11 @@ class Group(db.Model):
             UUID(),
             primary_key=True,
             default=uuid_ext.uuid4)
-
     name = db.Column(db.String(255),index=True, unique= True, nullable=False)
-    users = relationship('User', back_populates='group')
+    admin_uuid = db.Column(UUID(), db.ForeignKey('na_user.uuid'))
+    users = relationship('User',
+            secondary=user_group_assoc,
+            back_populates='groups')
     created = db.Column(db.DateTime, default=datetime.utcnow)
     updated = db.Column(db.DateTime,
             default=datetime.utcnow,
