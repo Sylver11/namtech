@@ -5,6 +5,12 @@ from datetime import datetime
 import uuid as uuid_ext
 
 
+class DatabaseResponse():
+    query_status = None
+    query_message = None
+    query_type = None
+
+
 class Log(db.Model):
     __tablename__ = 'na_logs'
     uuid = db.Column(
@@ -61,7 +67,7 @@ user_group_assoc = db.Table('na_user_group_assoc',
             primary_key=True),
         extend_existing=True)
 
-class Role(db.Model):
+class Role(db.Model, DatabaseResponse):
     __tablename__ = 'na_user_role'
     __table_args__ = {'extend_existing': True}
     uuid = db.Column(
@@ -78,7 +84,7 @@ class Role(db.Model):
             default=datetime.utcnow,
             onupdate=datetime.utcnow)
 
-class User(db.Model):
+class User(db.Model, DatabaseResponse):
     __tablename__ = 'na_user'
     __table_args__ = {'extend_existing': True}
     uuid = db.Column(
@@ -131,6 +137,13 @@ class User(db.Model):
     def deactivate_user(self):
         self.active = False
 
+    def add_groups(self, *groups):
+        self.groups.extend([group for group in groups if group not in
+            self.groups])
+
+    def remove_groups(self, *groups):
+        self.groups = [group for group in self.groups if group not in groups]
+
     def add_roles(self, *roles):
         self.roles.extend([role for role in roles if role not in self.roles])
 
@@ -156,7 +169,7 @@ class User(db.Model):
         return True
 
 
-class Group(db.Model):
+class Group(db.Model, DatabaseResponse):
     __tablename__ = 'na_user_group'
     __table_args__ = {'extend_existing': True}
     uuid = db.Column(
