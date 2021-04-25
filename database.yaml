@@ -3,5 +3,4 @@ db-defaults:
     Role:
       - {name: 'overlord', description: 'The absolute baas'}
       - {name: 'admin', description: 'Admin'}
-      - {name: 'leader', description: 'Group Admin'}
       - {name: 'user', description: 'Normal User'}
