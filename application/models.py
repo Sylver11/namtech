@@ -150,23 +150,20 @@ class User(db.Model, DatabaseResponse):
     def remove_roles(self, *roles):
         self.roles = [role for role in self.roles if role not in roles]
 
-    def has_roles(self, *requirements):
-        role_names = self.roles
+    def has_role(self, *requirements):
+        user_roles = [role.name for role in self.roles]
         for requirement in requirements:
             if isinstance(requirement, (list, tuple)):
                 tuple_of_role_names = requirement
                 authorized = False
                 for role_name in tuple_of_role_names:
-                    if role_name in role_names:
-                        authorized = True
-                        break
-                if not authorized:
-                    return False
+                    if role_name in user_roles:
+                        return True
             else:
                 role_name = requirement
-                if not role_name in role_names:
-                    return False
-        return True
+                if role_name in user_roles:
+                    return True
+        return False
 
 
 class Group(db.Model, DatabaseResponse):
