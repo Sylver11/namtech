@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError
-from application.extensions.security.security_manager import SecurityManager
-from application.extensions.security.models import User, Role, Group
+from flask_security import SecurityManager, UserDatastore
+from application.models import User, Role, Group
 from application.database import db
 import pytest
 import uuid

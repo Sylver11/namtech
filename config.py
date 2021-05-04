@@ -42,5 +42,5 @@ class ConfigTesting(Config):
     DEVELOPMENT = False
     DEBUG = False
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = environ.get("SQLALCHEMY_TEST_DATABASE_URI")
+    SQLALCHEMY_DATABASE_URI = environ.get('TEST_SQLALCHEMY_DATABASE_URI')
 

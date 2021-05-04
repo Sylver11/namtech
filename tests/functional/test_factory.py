@@ -3,7 +3,7 @@ import os
 
 def test_config():
     assert not create_app().testing
-    assert create_app('testing').testing
+    assert create_app('Testing').testing
 
 
 def test_user_route(client):

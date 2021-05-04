@@ -19,7 +19,6 @@ setup(
             'Flask-Migrate==2.5.3',
             'Flask-Cors==3.0.9',
             'Flask-Assets==2.0',
-            'Flask-login==0.5.0',
             'Flask-mail==0.9.1',
             'SQLAlchemy==1.3.22',
             'Flask-SQLAlchemy==2.4.4',

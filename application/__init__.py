@@ -4,7 +4,7 @@ the application gets configured and build. """
 def configure_logging(app):
     from flask import jsonify, has_request_context, request
     import sys, traceback
-    from flask_login import current_user
+    from flask_security import current_user
     import logging
     root = logging.getLogger()
     if app.config['LOG_SENTRY_ACTIVE']:
